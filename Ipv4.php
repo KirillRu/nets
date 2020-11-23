@@ -4,9 +4,21 @@ class Ipv4 {
 	protected $_v = 4;
 	protected $_padLength = 8;
 	protected $_sqlDriver;
+	protected $_localIp = [
+		'10.10.0.0/8'=>['start'=>'', 'end'=>''],
+		'172.16.0.0/12'=>['start'=>'', 'end'=>''],
+		'192.168.0.0/16'=>['start'=>'', 'end'=>''],
+		'127.0.0.0/8'=>['start'=>'', 'end'=>''],
+	];
 
 	function __construct() {
 		$this->_sqlDriver = new SqlDriver();
+		foreach ($this->_localIp as $net=>$v) {
+			list($ip, $mask) = explode('/', $net);
+			$ipBin = inet_pton($ip);
+			$maskBin = $this->_maskToBin($mask);
+			$this->_localIp[$net] = ['start'=>$this->_getNetwork($ipBin, $maskBin), 'end'=>$this->_getNetwork($ipBin, $maskBin, true)];
+		}
 	}
 
 	protected function _maskToBin ($mask) {
@@ -16,7 +28,7 @@ class Ipv4 {
 		return pack('H*', $hex);
 	}
 
-	function getNetwork($ipBin, $mask, $isEnd = false) {
+	protected function _getNetwork($ipBin, $mask, $isEnd = false) {
 		$ipParts = str_split($ipBin, 4);
 		$maskParts = str_split($mask, 4);
 		$bin = '';
@@ -25,6 +37,13 @@ class Ipv4 {
 			else $bin .= $part & $maskParts[$i];
 		}
 		return $bin;
+	}
+
+	function checkLocal($ipBin) {
+		foreach ($this->_localIp as $net=>$v) {
+			if (($ipBin >= $v['start']) and ($ipBin <= $v['end'])) return true;
+		}
+		return false;
 	}
 
 	function getMin($ipBin) {

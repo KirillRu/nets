@@ -24,7 +24,8 @@ if (!empty($_GET['ip'])) {
 
 	if (!empty($ipBin)) {
 		try {
-			$countryName = (new Geo())->getCountryName($ip);
+			if (!$ipv->checkLocal($ipBin)) $countryName = (new Geo())->getCountryName($ip);
+			else $countryName = 'Локальная сеть';
 		}
 		catch (Exception $e) {
 			$countryName = $e->getMessage();

@@ -4,5 +4,8 @@ require_once PATH_IPV4;
 class Ipv6 extends Ipv4 {
 	protected $_v = 6;
 	protected $_padLength = 32;
+	protected $_localIp = [
+		'FE80::/10'=>['start'=>'', 'end'=>''],
+	];
 
 }
