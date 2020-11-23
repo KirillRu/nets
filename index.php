@@ -27,9 +27,14 @@ if (!empty($_GET['ip'])) {
 			$countryName = (new Geo())->getCountryName($ip);
 		}
 		catch (Exception $e) {
-			$countryName = 'Не удалось определить страну';
+			$countryName = $e->getMessage();
 		}
-		$network = $ipv->getMin($ipBin);
+		try {
+			$network = $ipv->getMin($ipBin);
+		}
+		catch (Exception $e) {
+			$network = $e->getMessage();
+		}
 		include PATH_RESULT;
 	}
 }
